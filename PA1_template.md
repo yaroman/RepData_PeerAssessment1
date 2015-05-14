@@ -1,24 +1,21 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 It is now possible to collect a large amount of data about personal movement using activity monitoring devices such as a Fitbit, Nike Fuelband, or Jawbone Up. These type of devices are part of the "quantified self" movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. But these data remain under-utilized both because the raw data are hard to obtain and there is a lack of statistical methods and software for processing and interpreting the data.
 
 This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
 
 ## Loading and preprocessing the data
-````{r load_data}
+
+```r
 df <- read.csv("activity.csv")
 df$date <- as.Date(df$date, format = "%Y-%m-%d")
-````
+```
 
 ## What is mean total number of steps taken per day?
 
 This is a histogram of the total number of steps taken each day.
-````{r total_steps_per_day}
+
+```r
 #---------Summarize-------------------------------------
 df.byday <- aggregate(df[, 'steps'], by=list(df$date), FUN=sum, na.rm=TRUE)
 names(df.byday) <- c('date','steps')
@@ -33,15 +30,18 @@ abline(v = df.byday.median, col = "blue", lwd = 4)
 legend("topright", legend = c(paste("Mean is", df.byday.mean), 
     paste("Median is ", df.byday.median)), col = c("green", "blue"), 
     lty = 1)
-````
+```
 
-**The average (mean) number of steps taken each day is `` `r df.byday.mean` `` and the median number of steps taken each day is `` `r df.byday.median` ``.**               
+![](PA1_template_files/figure-html/total_steps_per_day-1.png) 
+
+**The average (mean) number of steps taken each day is `` 9354 `` and the median number of steps taken each day is `` 10395 ``.**               
 
 
 ## What is the average daily activity pattern?
 This is a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).
  
-````{r activity_pattern}
+
+```r
 #-------------------------Time series---------
 
 df.byinterval <-  aggregate(df[, 'steps'], by=list(df$interval), FUN=mean, na.rm=TRUE)
@@ -58,25 +58,31 @@ with(df.byinterval, {
                 
         )
 })
+```
 
+![](PA1_template_files/figure-html/activity_pattern-1.png) 
+
+```r
 df.byinterval.max.steps <- toString(df.byinterval[which(df.byinterval$steps == max(df.byinterval$steps)),]$interval)
-````
+```
 
-**The interval that contains the maximum number of steps on average across all the days in the dataset is `` `r df.byinterval.max.steps` `` **
+**The interval that contains the maximum number of steps on average across all the days in the dataset is `` 835 `` **
 
 
 ## Imputing missing values
 
 Calculating and reporting the total number of missing values in the dataset (i.e. the total number of rows with NAs)
-````{r missing_values_count}
+
+```r
 na.values.count <- nrow(subset(df, is.na(df$steps) == TRUE))
-````
-**The total number of missing values in the dataset (i.e. the total number of rows with NAs) is `` `r na.values.count` `` **
+```
+**The total number of missing values in the dataset (i.e. the total number of rows with NAs) is `` 2304 `` **
  
 
 Creating a new dataset that is equal to the original dataset but with the missing data filled in. Making a histogram of the total number of steps taken each day. Reporting the **mean** and **median** total number of steps taken per day.
 
-```` {r}
+
+```r
 df.adj <- df
 df.adj$steps[is.na(df.adj$steps)] <- ave(df.adj$steps, 
                                          df.adj$interval, 
@@ -96,15 +102,18 @@ abline(v = df.adj.byday.median, col = "blue", lwd = 4)
 legend("topright", legend = c(paste("Mean is", df.adj.byday.mean), 
                               paste("Median is ", df.adj.byday.median)), col = c("green", "blue"), 
        lty = 1)
-````
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-1-1.png) 
 
 **While the median value has stayed the same, the mean value got higher after adding missing data back. **
 
-**The average (mean) number of steps taken each day is `` `r df.adj.byday.mean` `` and the median number of steps taken each day is `` `r df.adj.byday.median` ``.**     
+**The average (mean) number of steps taken each day is `` 10766 `` and the median number of steps taken each day is `` 10762 ``.**     
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-````{r declare_function, results='hide'}
+
+```r
 #1. Declare a function
 my.weekend.function <- function(dte){
         if (weekdays(dte) == 'Saturday' || weekdays(dte) == 'Sunday'){
@@ -116,9 +125,10 @@ my.weekend.function <- function(dte){
         
         return(result)
 }
-````
+```
 
-````{r find_difference}
+
+```r
 #2. Add a new column
 df$date_type <- sapply(df[,2], my.weekend.function)
 df$date_type <-as.factor(df$date_type)
@@ -137,7 +147,9 @@ xyplot(
         ylab="Number of steps",
         layout=c(1,2)
 )
-````
+```
+
+![](PA1_template_files/figure-html/find_difference-1.png) 
 
 It looks like a person overall performes more steps during weekends. The person starts and ends their day later diring wekends also. 
 
